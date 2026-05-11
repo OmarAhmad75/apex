@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDev</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <div class="content">
+            <h1 class="main-title">استعلام سعر البيع</h1>
+            
+            <div id="scan-prompt" class="prompt">يرجى مسح الباركود...</div>
+
+            <div id="result-card" class="result-card">
+                <div class="result-item">
+                    <span class="label">اسم المنتج</span>
+                    <span id="product-name" class="value">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">السعر</span>
+                    <span id="product-price" class="value">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">الباركود</span>
+                    <span id="product-barcode" class="value">-</span>
+                </div>
+            </div>
+
+            <div class="loader">
+                <div class="shimmer"></div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        const card = document.getElementById('result-card');
+        const prompt = document.getElementById('scan-prompt');
+        
+        const nameEl = document.getElementById('product-name');
+        const priceEl = document.getElementById('product-price');
+        const barcodeEl = document.getElementById('product-barcode');
+
+        let lastBarcode = null;
+        let html5QrCode = null;
+
+        async function startCamera() {
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            // Check for available cameras
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    const cameraId = devices[0].id; // Use first available camera
+                    html5QrCode = new Html5Qrcode("reader");
+                    
+                    html5QrCode.start(
+                        { facingMode: "environment" }, // Prefer back camera on mobile
+                        config,
+                        (decodedText, decodedResult) => {
+                            // Success callback
+                            if (decodedText !== lastBarcode) {
+                                processBarcode(decodedText);
+                            }
+                        },
+                        (errorMessage) => {
+                            // parse error, ignore
+                        }
+                    ).catch(err => {
+                        console.error("Camera start error:", err);
+                    });
+                }
+            } catch (err) {
+                console.error("No camera found or permission denied:", err);
+            }
+        }
+
+        async function loadData() {
+            // Existing loadData logic...
+            const sheetId = '1G0GS-KGmYC97NH2HcDKgzmoVVJcjaugp';
+            const downloadUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+            
+            try {
+                const response = await fetch(downloadUrl);
+                const data = await response.text();
+                const rows = data.split('\n');
+                const startRow = 1; 
+                const newDb = {};
+                for (let i = startRow; i < rows.length; i++) {
+                    const columns = rows[i].split(',');
+                    if (columns.length >= 3) {
+                        const barcode = columns[0].trim();
+                        const name = columns[1].trim();
+                        const price = columns[2].trim();
+                        newDb[barcode] = { name, price: price + " د.أ" };
+                    }
+                }
+                db = newDb;
+                if (lastBarcode) updateDisplay(lastBarcode);
+                document.getElementById('scan-prompt').textContent = "تم تحديث البيانات. جاهز للمسح...";
+            } catch (error) {
+                document.getElementById('scan-prompt').textContent = "خطأ في تحديث البيانات!";
+            }
+        }
+
+        loadData();
+        setInterval(loadData, 5000);
+        
+        // Start camera on launch
+        startCamera();
+
+        let barcodeBuffer = '';
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                barcodeBuffer += e.key;
+            } else if (e.key === 'Enter') {
+                if (barcodeBuffer) {
+                    processBarcode(barcodeBuffer);
+                }
+                barcodeBuffer = '';
+            } else if (e.key === 'Escape') {
+                barcodeBuffer = '';
+            }
+        });
+
+        function playBeep() {
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play().catch(e => console.error("Error playing sound:", e));
+        }
+
+        function processBarcode(code) {
+            playBeep();
+            lastBarcode = code;
+            updateDisplay(code);
+        }
+
+        function updateDisplay(code) {
+            prompt.classList.add('hidden');
+            card.classList.remove('hidden');
+            const product = db[code] || { name: "منتج غير معروف", price: "غير متوفر" };
+            nameEl.textContent = product.name;
+            priceEl.textContent = product.price;
+            barcodeEl.textContent = code;
+        }
+    </script>
+    
+    <!-- Hidden Camera Reader Div -->
+    <div id="reader" style="width: 1px; height: 1px; opacity: 0; position: absolute; pointer-events: none;"></div>
+</body>
+</html>

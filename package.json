@@ -1,0 +1,33 @@
+{
+  "name": "smartdev",
+  "version": "1.0.0",
+  "description": "SmartDev Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win"
+  },
+  "keywords": [],
+  "author": "SmartDev Team",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.smartdev.app",
+    "productName": "SmartDev",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "logo.png"
+    }
+  }
+}

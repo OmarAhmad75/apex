@@ -1,0 +1,167 @@
+:root {
+    --xp-blue: #0053e1;
+    --xp-light-blue: #245edb;
+    --xp-bg: #ece9d8;
+    --xp-border: #003ca5;
+    --xp-orange: #ff8e00;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body {
+    background: #5a7edc; /* Classic XP Desktop Blue */
+    font-family: 'Cairo', sans-serif;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    direction: rtl; /* Arabic RTL support */
+    text-align: right;
+}
+
+.app-container {
+    width: 95vw;
+    height: 90vh;
+    background: var(--xp-bg);
+    border: 3px solid var(--xp-border);
+    border-radius: 8px 8px 0 0;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* XP Style Title Bar */
+.app-container::before {
+    content: 'SmartDev - استعلام سعر البيع';
+    display: block;
+    height: 30px;
+    background: linear-gradient(180deg, #0058e6 0%, #2579f5 10%, #0058e6 50%, #0046b3 100%);
+    color: white;
+    padding: 5px 15px;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+    border-bottom: 1px solid #003ca5;
+    text-align: right; /* Align title to right */
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 30px;
+}
+
+.main-title {
+    font-size: 3rem;
+    color: #000;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: none;
+}
+
+.prompt {
+    font-size: 1.5rem;
+    color: #333;
+    background: #fff;
+    padding: 10px 20px;
+    border: 1px solid #7f9db9;
+}
+
+.result-card {
+    background: #fff;
+    border: 1px solid #003ca5;
+    width: 100%;
+    max-width: 800px; /* Increased from 600px */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Header for result card like a sub-window */
+.result-card::before {
+    content: 'بيانات المنتج';
+    background: #7ca8ef;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 25px 30px; /* Increased padding */
+    border-bottom: 1px solid #ece9d8;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-size: 1.5rem; /* Increased size */
+    color: #666;
+}
+
+.value {
+    font-size: 2rem; /* Increased size */
+    color: #000;
+    font-weight: bold;
+}
+
+#product-price {
+    font-size: 4rem; /* Significantly increased price size */
+    color: #17960d; /* Green color for price */
+}
+
+.loader {
+    width: 200px;
+    height: 20px;
+    background: #fff;
+    border: 1px solid #7f9db9;
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    bottom: 2px;
+    width: 40px;
+    background: linear-gradient(90deg, #32d322 0%, #17960d 100%); /* Green XP progress bar */
+    border-radius: 2px;
+    animation: xpLoading 2s infinite linear;
+}
+
+@keyframes xpLoading {
+    from { left: -50px; }
+    to { left: 100%; }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Draggable area for the frameless window */
+.app-container {
+    -webkit-app-region: drag;
+}
+
+.content {
+    -webkit-app-region: no-drag;
+}
