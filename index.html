@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
     <div class="app-container">
@@ -19,6 +19,10 @@
             <h1 class="main-title">استعلام سعر البيع</h1>
             
             <div id="scan-prompt" class="prompt">يرجى مسح الباركود...</div>
+
+            <div id="reader-container" style="width: 400px; margin-bottom: 20px; border: 2px solid var(--xp-border); background: #000;">
+                <div id="reader" style="width: 100%;"></div>
+            </div>
 
             <div id="result-card" class="result-card">
                 <div class="result-item">
@@ -50,58 +54,20 @@
         const priceEl = document.getElementById('product-price');
         const barcodeEl = document.getElementById('product-barcode');
 
+        let db = {};
         let lastBarcode = null;
-        let html5QrCode = null;
-
-        async function startCamera() {
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const readerEl = document.getElementById('reader');
-            
-            if (isMobile) {
-                readerEl.classList.remove('hidden-reader');
-                readerEl.classList.add('mobile-reader');
-            }
-
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
-            // Check for available cameras
-            try {
-                const devices = await Html5Qrcode.getCameras();
-                if (devices && devices.length > 0) {
-                    const cameraId = devices[0].id; // Use first available camera
-                    html5QrCode = new Html5Qrcode("reader");
-                    
-                    html5QrCode.start(
-                        { facingMode: "environment" }, // Prefer back camera on mobile
-                        config,
-                        (decodedText, decodedResult) => {
-                            // Success callback
-                            if (decodedText !== lastBarcode) {
-                                processBarcode(decodedText);
-                            }
-                        },
-                        (errorMessage) => {
-                            // parse error, ignore
-                        }
-                    ).catch(err => {
-                        console.error("Camera start error:", err);
-                    });
-                }
-            } catch (err) {
-                console.error("No camera found or permission denied:", err);
-            }
-        }
 
         async function loadData() {
-            // Existing loadData logic...
             const sheetId = '1G0GS-KGmYC97NH2HcDKgzmoVVJcjaugp';
             const downloadUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
             
             try {
                 const response = await fetch(downloadUrl);
                 const data = await response.text();
+                
                 const rows = data.split('\n');
                 const startRow = 1; 
+                
                 const newDb = {};
                 for (let i = startRow; i < rows.length; i++) {
                     const columns = rows[i].split(',');
@@ -113,18 +79,20 @@
                     }
                 }
                 db = newDb;
-                if (lastBarcode) updateDisplay(lastBarcode);
+                
+                if (lastBarcode) {
+                    updateDisplay(lastBarcode);
+                }
+                
                 document.getElementById('scan-prompt').textContent = "تم تحديث البيانات. جاهز للمسح...";
             } catch (error) {
+                console.error("Error loading data:", error);
                 document.getElementById('scan-prompt').textContent = "خطأ في تحديث البيانات!";
             }
         }
 
         loadData();
         setInterval(loadData, 5000);
-        
-        // Start camera on launch
-        startCamera();
 
         let barcodeBuffer = '';
         window.addEventListener('keydown', (e) => {
@@ -154,14 +122,37 @@
         function updateDisplay(code) {
             prompt.classList.add('hidden');
             card.classList.remove('hidden');
+            
             const product = db[code] || { name: "منتج غير معروف", price: "غير متوفر" };
+            
             nameEl.textContent = product.name;
             priceEl.textContent = product.price;
             barcodeEl.textContent = code;
         }
+
+        // Camera Scanning Logic
+        let isScanning = false;
+        function onScanSuccess(decodedText, decodedResult) {
+            if (isScanning) return;
+            
+            isScanning = true;
+            processBarcode(decodedText);
+            
+            // Wait 2 seconds before allowing another scan
+            setTimeout(() => {
+                isScanning = false;
+            }, 2000);
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        // Start scanning with the back camera (or default)
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+            .catch(err => {
+                console.error("Camera start error:", err);
+                document.getElementById('reader-container').style.display = 'none';
+            });
     </script>
-    
-    <!-- Camera Reader Div -->
-    <div id="reader" class="hidden-reader"></div>
 </body>
 </html>
