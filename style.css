@@ -17,28 +17,27 @@
 body {
     background: #5a7edc; /* Classic XP Desktop Blue */
     font-family: 'Cairo', sans-serif;
-    min-height: 100vh; /* Changed from height to min-height */
+    height: 100vh;
     width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-y: auto; /* Enabled scrolling */
+    overflow: hidden;
     direction: rtl; /* Arabic RTL support */
     text-align: right;
 }
 
 .app-container {
     width: 95vw;
-    min-height: 90vh; /* Changed from height to min-height */
+    height: 90vh;
     background: var(--xp-bg);
     border: 3px solid var(--xp-border);
     border-radius: 8px 8px 0 0;
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Enabled scrolling */
+    overflow: hidden;
     position: relative;
-    margin: 20px 0; /* Add some margin for better scroll feel */
 }
 
 /* XP Style Title Bar */
@@ -61,35 +60,53 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px;
-    gap: 30px;
+    padding: 20px;
+    gap: 20px;
+    width: 100%;
+    overflow-y: auto;
+}
+
+#reader-container {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 10px;
+    border: 3px double var(--xp-border);
+    background: #000;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* Add a small header to camera like a mini-window */
+#reader-container::before {
+    content: 'معاينة الكاميرا';
+    display: block;
+    background: #7ca8ef;
+    color: white;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: right;
 }
 
 .main-title {
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 3.5rem); /* Responsive font size */
     color: #000;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     text-shadow: none;
-}
-
-.prompt {
-    font-size: 1.5rem;
-    color: #333;
-    background: #fff;
-    padding: 10px 20px;
-    border: 1px solid #7f9db9;
+    text-align: center;
 }
 
 .result-card {
     background: #fff;
     border: 1px solid #003ca5;
     width: 100%;
-    max-width: 800px; /* Increased from 600px */
+    max-width: 800px;
     padding: 0;
     display: flex;
     flex-direction: column;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
 }
 
 /* Header for result card like a sub-window */
