@@ -17,27 +17,28 @@
 body {
     background: #5a7edc; /* Classic XP Desktop Blue */
     font-family: 'Cairo', sans-serif;
-    height: 100vh;
+    min-height: 100vh; /* Changed from height to min-height */
     width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow-y: auto; /* Enabled scrolling */
     direction: rtl; /* Arabic RTL support */
     text-align: right;
 }
 
 .app-container {
     width: 95vw;
-    height: 90vh;
+    min-height: 90vh; /* Changed from height to min-height */
     background: var(--xp-bg);
     border: 3px solid var(--xp-border);
     border-radius: 8px 8px 0 0;
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto; /* Enabled scrolling */
     position: relative;
+    margin: 20px 0; /* Add some margin for better scroll feel */
 }
 
 /* XP Style Title Bar */
